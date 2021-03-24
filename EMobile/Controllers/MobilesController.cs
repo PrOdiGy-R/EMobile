@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EMobile.Services;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,40 +17,29 @@ namespace EMobile.Controllers
     [ApiVersion("1.0")]
     public class MobilesController : ControllerBase
     {
-        private readonly EMobileDbContext _context;
+        private readonly IMobileService _roomService;
 
-        public MobilesController(EMobileDbContext context)
+        public MobilesController(IMobileService service)
         {
-            _context = context;
+            _roomService = service;
+        }
+
+        [HttpGet(Name = nameof(GetMobiles))]
+        public IActionResult GetMobiles()
+        {
+            throw new NotImplementedException();
         }
 
         [HttpGet("{mobileId}", Name =nameof(GetMobileById))]
         [ProducesResponseType(404)]
+        [ProducesResponseType(200)]
         public async Task<ActionResult<Mobile>> GetMobileById(Guid mobileId)
         {
-            var entity = await _context.Mobiles.SingleOrDefaultAsync(x => x.Id == mobileId);
+            var mobile = await _roomService.GetMobileAsync(mobileId);
 
-            if(entity == null)
-            {
-                return NotFound();
-            }
+            if (mobile == null) return NotFound();
 
-            var resource = new Mobile
-            {
-                Href = Url.Link(nameof(GetMobileById), new { mobileId = entity.Id }),
-                Model = entity.Model,
-                Brand = entity.Brand,
-                Size = entity.Size,
-                Weight = entity.Weight,
-                Resolution = entity.Resolution,
-                Processor = entity.Processor,
-                OperatingSystem = entity.OperatingSystem,
-                Price = entity.Price,
-                ImagePath = entity.ImagePath,
-                VideoPath = entity.VideoPath
-            };
-
-            return resource;
+            return mobile;
         }
 
         //// GET: api/<MobilesController>
