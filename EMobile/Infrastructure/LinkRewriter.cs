@@ -20,7 +20,7 @@ namespace EMobile.Infrastructure
         {
             if (original == null) return null;
 
-            return new()
+            return new Link
             {
                 Href = _urlHelper.Link(original.RouteName, original.RouteValues),
                 Method = original.Method,

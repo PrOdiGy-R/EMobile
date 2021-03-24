@@ -12,7 +12,7 @@ namespace EMobile.Models
         public const string GetMethod = "GET";
 
         public static Link To(string routeName, object routeValues = null)
-            => new()
+            => new Link
             {
                 RouteName = routeName,
                 RouteValues = routeValues,
@@ -24,17 +24,19 @@ namespace EMobile.Models
         public string Href { get; set; }
 
         [JsonProperty(Order = -3, PropertyName = "rel", NullValueHandling = NullValueHandling.Ignore)]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string Relations { get; set; }
 
         [JsonProperty(Order = -2, DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
         [DefaultValue(GetMethod)]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string Method { get; set; }
 
         // Stores route name-parameters before being rewritten by LinkRewritingFilter
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string RouteName { get; set; }
 
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public object RouteValues { get; set; }
     }
 }

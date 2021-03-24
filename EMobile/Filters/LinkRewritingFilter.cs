@@ -21,10 +21,13 @@ namespace EMobile.Filters
             _urlHelperFactory = urlHelperFactory;
         }
 
-        public Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+        public Task OnResultExecutionAsync(
+            ResultExecutingContext context, ResultExecutionDelegate next)
         {
             var asObjectResult = context.Result as ObjectResult;
-            bool shouldSkip = asObjectResult?.StatusCode >= 400 || asObjectResult?.Value == null || asObjectResult?.Value as Resource == null;
+            bool shouldSkip = asObjectResult?.StatusCode >= 400
+                || asObjectResult?.Value == null
+                || asObjectResult?.Value as Resource == null;
 
             if (shouldSkip)
             {
@@ -35,7 +38,6 @@ namespace EMobile.Filters
             RewriteAllLinks(asObjectResult.Value, rewriter);
 
             return next();
-
         }
 
         private static void RewriteAllLinks(object model, LinkRewriter rewriter)
@@ -51,15 +53,16 @@ namespace EMobile.Filters
             var linkProperties = allProperties
                 .Where(p => p.CanWrite && p.PropertyType == typeof(Link));
 
-            foreach (var linkPropery in linkProperties)
+            foreach (var linkProperty in linkProperties)
             {
-                var rewritten = rewriter.Rewrite(linkPropery.GetValue(model) as Link);
-
+                var rewritten = rewriter.Rewrite(linkProperty.GetValue(model) as Link);
                 if (rewritten == null) continue;
 
-                linkPropery.SetValue(model, rewritten);
+                linkProperty.SetValue(model, rewritten);
 
-                if (linkPropery.Name == nameof(Resource.Self))
+                // Special handling of the hidden Self property:
+                // unwrap into the root object
+                if (linkProperty.Name == nameof(Resource.Self))
                 {
                     allProperties
                         .SingleOrDefault(p => p.Name == nameof(Resource.Href))
@@ -84,7 +87,10 @@ namespace EMobile.Filters
             RewriteLinksInNestedObjects(objectProperties, model, rewriter);
         }
 
-        private static void RewriteLinksInNestedObjects(IEnumerable<PropertyInfo> objectProperties, object model, LinkRewriter rewriter)
+        private static void RewriteLinksInNestedObjects(
+            IEnumerable<PropertyInfo> objectProperties,
+            object model,
+            LinkRewriter rewriter)
         {
             foreach (var objectProperty in objectProperties)
             {
@@ -101,8 +107,12 @@ namespace EMobile.Filters
             }
         }
 
-        private static void RewriteLinksInArrays(IEnumerable<PropertyInfo> arrayProperties, object model, LinkRewriter rewriter)
+        private static void RewriteLinksInArrays(
+            IEnumerable<PropertyInfo> arrayProperties,
+            object model,
+            LinkRewriter rewriter)
         {
+
             foreach (var arrayProperty in arrayProperties)
             {
                 var array = arrayProperty.GetValue(model) as Array ?? new Array[0];
@@ -113,5 +123,6 @@ namespace EMobile.Filters
                 }
             }
         }
+
     }
 }
