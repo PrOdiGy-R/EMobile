@@ -16,7 +16,7 @@ namespace EMobile.Controllers
             var response = new RootResponse
             {
                 Self = Link.To(nameof(GetRoot)),
-                Mobiles = Link.To(nameof(MobilesController.GetMobiles))
+                Mobiles = Link.ToCollection(nameof(MobilesController.GetAllMobiles))
             };
 
             return Ok(response);

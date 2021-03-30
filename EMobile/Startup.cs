@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using EMobile.Data;
 using EMobile.Services;
 using EMobile.Infrastructure;
+using EMobile.Models;
 
 namespace EMobile
 {
@@ -57,6 +58,17 @@ namespace EMobile
             });
 
             services.AddAutoMapper(options => options.AddProfile<MappingProfile>());
+
+            services.Configure<PagingOptions>(Configuration.GetSection("DefaultPagingOptions"));
+
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.InvalidModelStateResponseFactory = context =>
+                {
+                    var errorResponse = new ApiError(context.ModelState);
+                    return new BadRequestObjectResult(errorResponse);
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

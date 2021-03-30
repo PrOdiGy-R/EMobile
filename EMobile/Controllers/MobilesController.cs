@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using EMobile.Services;
+using Microsoft.Extensions.Options;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,15 +20,28 @@ namespace EMobile.Controllers
     {
         private readonly IMobileService _roomService;
 
-        public MobilesController(IMobileService service)
+        private readonly PagingOptions _defaultPagingOptions;
+
+        public MobilesController(IMobileService service, IOptions<PagingOptions> defaultPagingOptionsWrapper)
         {
             _roomService = service;
+            _defaultPagingOptions = defaultPagingOptionsWrapper.Value;
         }
 
-        [HttpGet(Name = nameof(GetMobiles))]
-        public IActionResult GetMobiles()
+        [HttpGet(Name = nameof(GetAllMobiles))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<Collection<Mobile>>> GetAllMobiles([FromQuery]PagingOptions pagingOptions = null)
         {
-            throw new NotImplementedException();
+            pagingOptions.Offset ??= _defaultPagingOptions.Offset;
+            pagingOptions.Limit ??= _defaultPagingOptions.Limit;
+
+            var mobiles = await _roomService.GetMobilesAsync(pagingOptions);
+
+            var collection = PagedCollection<Mobile>
+                .Create(Link.ToCollection(nameof(GetAllMobiles)), mobiles.Items.ToArray(), mobiles.TotalSize, pagingOptions);
+
+            return collection;
         }
 
         [HttpGet("{mobileId}", Name =nameof(GetMobileById))]

@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using EMobile.Data;
 using EMobile.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EMobile.Services
@@ -28,6 +31,21 @@ namespace EMobile.Services
             }
 
             return _mapper.Map<Mobile>(entity);
+        }
+
+        public async Task<PagedResults<Mobile>> GetMobilesAsync(PagingOptions pagingOptions)
+        {
+            var allMobiles = _context.Mobiles
+                .ProjectTo<Mobile>(_mapper.ConfigurationProvider);
+
+            var pagedMobiles = await allMobiles.Skip(pagingOptions.Offset.Value)
+                .Take(pagingOptions.Limit.Value).ToArrayAsync();
+
+            return new PagedResults<Mobile>
+            {
+                Items = pagedMobiles,
+                TotalSize = allMobiles.Count()
+            };
         }
     }
 }

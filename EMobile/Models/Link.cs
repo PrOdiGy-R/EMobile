@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace EMobile.Models
 {
@@ -12,7 +13,7 @@ namespace EMobile.Models
         public const string GetMethod = "GET";
 
         public static Link To(string routeName, object routeValues = null)
-            => new Link
+            => new()
             {
                 RouteName = routeName,
                 RouteValues = routeValues,
@@ -20,20 +21,27 @@ namespace EMobile.Models
                 Relations = null
             };
 
-        [JsonProperty(Order = -4)]
+        public static Link ToCollection(string routeName, object routeValues = null)
+            => new()
+            {
+                RouteName = routeName,
+                RouteValues = routeValues,
+                Method = GetMethod,
+                Relations = new[] { "collection" }
+            };
+
         public string Href { get; set; }
 
-        [JsonProperty(Order = -3, PropertyName = "rel", NullValueHandling = NullValueHandling.Ignore)]
-        [System.Text.Json.Serialization.JsonIgnore]
-        public string Relations { get; set; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        [JsonPropertyName("rel")]
+        public string[] Relations { get; set; }
 
-        [JsonProperty(Order = -2, DefaultValueHandling = DefaultValueHandling.Ignore, NullValueHandling = NullValueHandling.Ignore)]
         [DefaultValue(GetMethod)]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string Method { get; set; }
 
         // Stores route name-parameters before being rewritten by LinkRewritingFilter
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public string RouteName { get; set; }
 
         [System.Text.Json.Serialization.JsonIgnore]
