@@ -33,18 +33,23 @@ namespace EMobile.Services
             return _mapper.Map<Mobile>(entity);
         }
 
-        public async Task<PagedResults<Mobile>> GetMobilesAsync(PagingOptions pagingOptions)
+        public async Task<PagedResults<Mobile>> GetMobilesAsync(PagingOptions pagingOptions, SortOptions<Mobile, MobileEntity> sortOptions)
         {
-            var allMobiles = _context.Mobiles
-                .ProjectTo<Mobile>(_mapper.ConfigurationProvider);
+            IQueryable<MobileEntity> query = _context.Mobiles;
+            query = sortOptions.Apply(query);
 
-            var pagedMobiles = await allMobiles.Skip(pagingOptions.Offset.Value)
-                .Take(pagingOptions.Limit.Value).ToArrayAsync();
+            var size = await query.CountAsync();
+
+            var items = await query
+                .Skip(pagingOptions.Offset.Value)
+                .Take(pagingOptions.Limit.Value)
+                .ProjectTo<Mobile>(_mapper.ConfigurationProvider)
+                .ToArrayAsync();
 
             return new PagedResults<Mobile>
             {
-                Items = pagedMobiles,
-                TotalSize = allMobiles.Count()
+                Items = items,
+                TotalSize = size
             };
         }
     }

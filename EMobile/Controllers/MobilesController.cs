@@ -31,12 +31,13 @@ namespace EMobile.Controllers
         [HttpGet(Name = nameof(GetAllMobiles))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Collection<Mobile>>> GetAllMobiles([FromQuery]PagingOptions pagingOptions = null)
+        public async Task<ActionResult<Collection<Mobile>>> GetAllMobiles(
+            [FromQuery] PagingOptions pagingOptions, [FromQuery] SortOptions<Mobile, MobileEntity> sortOptions)
         {
             pagingOptions.Offset ??= _defaultPagingOptions.Offset;
             pagingOptions.Limit ??= _defaultPagingOptions.Limit;
 
-            var mobiles = await _roomService.GetMobilesAsync(pagingOptions);
+            var mobiles = await _roomService.GetMobilesAsync(pagingOptions, sortOptions);
 
             var collection = PagedCollection<Mobile>
                 .Create(Link.ToCollection(nameof(GetAllMobiles)), mobiles.Items.ToArray(), mobiles.TotalSize, pagingOptions);
