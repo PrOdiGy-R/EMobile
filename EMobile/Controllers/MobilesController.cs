@@ -18,13 +18,13 @@ namespace EMobile.Controllers
     [ApiVersion("1.0")]
     public class MobilesController : ControllerBase
     {
-        private readonly IMobileService _roomService;
+        private readonly IMobileService _mobileService;
 
         private readonly PagingOptions _defaultPagingOptions;
 
         public MobilesController(IMobileService service, IOptions<PagingOptions> defaultPagingOptionsWrapper)
         {
-            _roomService = service;
+            _mobileService = service;
             _defaultPagingOptions = defaultPagingOptionsWrapper.Value;
         }
 
@@ -37,7 +37,7 @@ namespace EMobile.Controllers
             pagingOptions.Offset ??= _defaultPagingOptions.Offset;
             pagingOptions.Limit ??= _defaultPagingOptions.Limit;
 
-            var mobiles = await _roomService.GetMobilesAsync(pagingOptions, sortOptions);
+            var mobiles = await _mobileService.GetMobilesAsync(pagingOptions, sortOptions);
 
             var collection = PagedCollection<Mobile>
                 .Create(Link.ToCollection(nameof(GetAllMobiles)), mobiles.Items.ToArray(), mobiles.TotalSize, pagingOptions);
@@ -50,7 +50,7 @@ namespace EMobile.Controllers
         [ProducesResponseType(200)]
         public async Task<ActionResult<Mobile>> GetMobileById(Guid mobileId)
         {
-            var mobile = await _roomService.GetMobileAsync(mobileId);
+            var mobile = await _mobileService.GetMobileAsync(mobileId);
 
             if (mobile == null) return NotFound();
 
